@@ -10,4 +10,14 @@
     <string name="welcome_subtitle_2">Follow the exchange rate and react to changes in price dynamics in time.</string>
     <string name="welcome_subtitle_3">Find out how much ether 1.23 bitcoin.</string>
     <string name="welcome_start_btn">Start</string>
+
+    <string name="main_bottom_navigation_item_accounts">Purses</string>
+    <string name="main_bottom_navigation_item_rate">Course</string>
+    <string name="main_bottom_navigation_item_converter">Converter</string>
+
+    <string name="rate_screen_title">Crypto currency exchange rate</string>
+    <string name="rate_menu_item_sort">Sort</string>
+    <string name="rate_menu_item_currency">Currency</string>
+    <string name="rate_item_percent_change" translatable="false">%.2f%%</string>
+
 </resources>
