@@ -94,12 +94,7 @@ public class RateFragment extends Fragment implements RateView{
         recycler.setAdapter(adapter);
 
 
-        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.onRefresh();
-            }
-        });
+        refresh.setOnRefreshListener(() -> presenter.onRefresh());
 
 
         presenter.attachView(this);

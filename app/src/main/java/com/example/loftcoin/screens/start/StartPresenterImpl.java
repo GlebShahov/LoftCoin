@@ -59,38 +59,15 @@ public class StartPresenterImpl implements StartPresenter {
     public void loadRates() {
        Disposable disposable = api.rates(Api.CONVERT)
                .subscribeOn(Schedulers.io())
-               .map(new Function<RateResponse, List<Coin>>() {
-                   @Override
-                   public List<Coin> apply(RateResponse rateResponse) throws Exception {
-                       return rateResponse.data;
-                   }
-               })
-               .map(new Function<List<Coin>, List<CoinEntity>>() {
-                   @Override
-                   public List<CoinEntity> apply(List<Coin> coins) throws Exception {
-                       return coinEntityMapper.map(coins);
-                   }
-               })
-               .doOnNext(new Consumer<List<CoinEntity>>() {
-                   @Override
-                   public void accept(List<CoinEntity> coinEntities) throws Exception {
-                       database.saveCoins(coinEntities);
-                   }
-               })
+               .map(rateResponse -> rateResponse.data)
+               .map(coins -> coinEntityMapper.map(coins))
+               .doOnNext(coinEntities -> database.saveCoins(coinEntities))
                .observeOn(AndroidSchedulers.mainThread())
-               .subscribe(new Consumer<List<CoinEntity>>() {
-                   @Override
-                   public void accept(List<CoinEntity> coinEntities) throws Exception {
-                       if(view != null){
-                           view.navigateToMainScreen();
-                       }
+               .subscribe(coinEntities -> {
+                   if(view != null){
+                       view.navigateToMainScreen();
                    }
-               }, new Consumer<Throwable>() {
-                   @Override
-                   public void accept(Throwable throwable) throws Exception {
-                            Timber.e(throwable);
-                   }
-               });
+               }, throwable -> Timber.e(throwable));
        disposables.add(disposable);
 
     }
