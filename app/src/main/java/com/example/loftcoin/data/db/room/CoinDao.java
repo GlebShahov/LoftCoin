@@ -9,11 +9,12 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import io.reactivex.Flowable;
 
 @Dao
 public interface CoinDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void saveCoins(List<CoinEntity> coins);
     @Query("SELECT * FROM Coin")
-    List<CoinEntity> getCoins();
+   Flowable <List<CoinEntity>> getCoins();
 }

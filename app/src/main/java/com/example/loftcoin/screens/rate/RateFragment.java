@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +34,6 @@ import java.util.List;
 
 
 public class RateFragment extends Fragment implements RateView{
-
 
     public RateFragment() {
         // Required empty public constructor
@@ -93,12 +94,7 @@ public class RateFragment extends Fragment implements RateView{
         recycler.setAdapter(adapter);
 
 
-        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.onRefresh();
-            }
-        });
+        refresh.setOnRefreshListener(() -> presenter.onRefresh());
 
 
         presenter.attachView(this);
@@ -109,6 +105,7 @@ public class RateFragment extends Fragment implements RateView{
 
     @Override
     public void setCoins(List<CoinEntity> coins) {
+        Timber.d("setCoins: ");
         adapter.setItems(coins);
     }
 
