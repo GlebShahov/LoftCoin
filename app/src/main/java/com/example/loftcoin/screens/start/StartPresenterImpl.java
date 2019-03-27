@@ -13,6 +13,13 @@ import com.example.loftcoin.utils.Fiat;
 import java.util.List;
 
 import androidx.annotation.Nullable;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,6 +30,7 @@ public class StartPresenterImpl implements StartPresenter {
     private Api api;
     private Database database;
     private CoinEntityMapper coinEntityMapper;
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     @Nullable
     private StartView view;
@@ -42,34 +50,48 @@ public class StartPresenterImpl implements StartPresenter {
 
     @Override
     public void detachView() {
+        disposables.dispose();
         view = null;
 
     }
 
     @Override
     public void loadRates() {
+       Disposable disposable = api.rates(Api.CONVERT)
+               .subscribeOn(Schedulers.io())
+               .map(new Function<RateResponse, List<Coin>>() {
+                   @Override
+                   public List<Coin> apply(RateResponse rateResponse) throws Exception {
+                       return rateResponse.data;
+                   }
+               })
+               .map(new Function<List<Coin>, List<CoinEntity>>() {
+                   @Override
+                   public List<CoinEntity> apply(List<Coin> coins) throws Exception {
+                       return coinEntityMapper.map(coins);
+                   }
+               })
+               .doOnNext(new Consumer<List<CoinEntity>>() {
+                   @Override
+                   public void accept(List<CoinEntity> coinEntities) throws Exception {
+                       database.saveCoins(coinEntities);
+                   }
+               })
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribe(new Consumer<List<CoinEntity>>() {
+                   @Override
+                   public void accept(List<CoinEntity> coinEntities) throws Exception {
+                       if(view != null){
+                           view.navigateToMainScreen();
+                       }
+                   }
+               }, new Consumer<Throwable>() {
+                   @Override
+                   public void accept(Throwable throwable) throws Exception {
+                            Timber.e(throwable);
+                   }
+               });
+       disposables.add(disposable);
 
-        Call <RateResponse> call = api.rates(Api.CONVERT);
-        call.enqueue(new Callback<RateResponse>() {
-            @Override
-            public void onResponse(Call<RateResponse> call, Response<RateResponse> response) {
-                if(response.body() != null){
-                    List<Coin> coins = response.body().data;
-                    List<CoinEntity> coinEntities = coinEntityMapper.map(coins);
-                    database.saveCoins(coinEntities);
-                }
-
-                if (view != null){
-                    view.navigateToMainScreen();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<RateResponse> call, Throwable t) {
-                Timber.e(t);
-
-            }
-        });
     }
 }
