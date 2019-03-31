@@ -1,5 +1,7 @@
 package com.example.loftcoin.screens.rate;
 
+import com.example.loftcoin.utils.Fiat;
+
 public interface RatePresenter{
 
     void attachView(RateView view);
@@ -8,6 +10,10 @@ public interface RatePresenter{
 
     void getRate();
 
+    void onMenuItemCurrencyClick();
+
     void onRefresh();
+
+    void onFiatCurrencySelcted(Fiat currency);
 }
 

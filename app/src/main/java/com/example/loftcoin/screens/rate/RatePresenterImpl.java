@@ -7,6 +7,7 @@ import com.example.loftcoin.data.db.Database;
 import com.example.loftcoin.data.db.model.CoinEntity;
 import com.example.loftcoin.data.db.model.CoinEntityMapper;
 import com.example.loftcoin.data.prefs.Prefs;
+import com.example.loftcoin.utils.Fiat;
 
 import java.util.List;
 
@@ -67,6 +68,13 @@ public class RatePresenterImpl implements RatePresenter {
         disposables.add(disposable);
     }
 
+    @Override
+    public void onMenuItemCurrencyClick() {
+        if (view != null){
+            view.showCurrencyDialog();
+        }
+    }
+
     private void loadRate(){
 
         Disposable disposable = api.rates(Api.CONVERT)
@@ -90,5 +98,13 @@ public class RatePresenterImpl implements RatePresenter {
     @Override
     public void onRefresh() {
         loadRate();
+    }
+
+    @Override
+    public void onFiatCurrencySelcted(Fiat currency) {
+        prefs.setFiatCurrency(currency);
+        if(view!=null) {
+            view.invalidateRates();
+        }
     }
 }
