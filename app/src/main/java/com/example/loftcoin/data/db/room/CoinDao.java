@@ -17,4 +17,7 @@ public interface CoinDao {
     void saveCoins(List<CoinEntity> coins);
     @Query("SELECT * FROM Coin")
    Flowable <List<CoinEntity>> getCoins();
+
+    @Query("SELECT * FROM Coin WHERE symbol = :symbol")
+    CoinEntity getCoin(String symbol);
 }
