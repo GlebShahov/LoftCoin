@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import com.example.loftcoin.R;
 import com.example.loftcoin.screens.converter.ConverterFragment;
 import com.example.loftcoin.screens.rate.RateFragment;
+import com.example.loftcoin.screens.wallets.WalletsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,28 +39,35 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setOnNavigationItemReselectedListener(menuItem -> {
 
         });
+        if (savedInstanceState == null) {
+            bottomNavigation.setSelectedItemId(R.id.menu_item_rate);
+        }
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navigationListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.menu_item_accounts:
-                    return true;
+    private BottomNavigationView.OnNavigationItemSelectedListener navigationListener = menuItem -> {
+        switch (menuItem.getItemId()) {
+            case R.id.menu_item_accounts:
+                showWalletsFragment();
+                return true;
 
-                case R.id.menu_item_rate:
-                    showRateFragment();
-                    return true;
+            case R.id.menu_item_rate:
+                showRateFragment();
+                return true;
 
-                case R.id.menu_item_converter:
-                    showConverterFragment();
-                    return true;
-            }
-            return false;
+            case R.id.menu_item_converter:
+                showConverterFragment();
+                return true;
         }
+        return false;
     };
 
-
+    private void showWalletsFragment() {
+        WalletsFragment fragment = new WalletsFragment();
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+    }
 
     private void showRateFragment() {
         RateFragment fragment = new RateFragment();
