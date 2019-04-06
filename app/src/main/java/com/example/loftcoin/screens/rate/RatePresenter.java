@@ -14,6 +14,6 @@ public interface RatePresenter{
 
     void onRefresh();
 
-    void onFiatCurrencySelcted(Fiat currency);
+    void onFiatCurrencySelected(Fiat currency);
 }
 

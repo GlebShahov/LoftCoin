@@ -1,26 +1,25 @@
 package com.example.loftcoin.data.db.model;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
-@Entity
-public class Transaction {
+import io.realm.RealmObject;
 
-    @PrimaryKey(autoGenerate = true)
-    public int transactionId;
+public class Transaction extends RealmObject {
+
 
     public String walletId;
 
-    public String currencyId;
+    public CoinEntity coin;
 
     public double amount;
 
     public long date;
 
+    public Transaction() {
+    }
 
-    public Transaction(String walletId, String currencyId, double amount, long date) {
+    public Transaction(String walletId, double amount, long date, CoinEntity coin) {
         this.walletId = walletId;
-        this.currencyId = currencyId;
+        this.coin = coin;
         this.amount = amount;
         this.date = date;
     }

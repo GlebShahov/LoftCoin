@@ -6,9 +6,7 @@ import com.example.loftcoin.App;
 import com.example.loftcoin.data.db.Database;
 import com.example.loftcoin.data.db.model.CoinEntity;
 import com.example.loftcoin.data.db.model.Transaction;
-import com.example.loftcoin.data.db.model.TransactionModel;
 import com.example.loftcoin.data.db.model.Wallet;
-import com.example.loftcoin.data.db.model.WalletModel;
 import com.example.loftcoin.utils.SingleLiveData;
 
 import java.util.ArrayList;
@@ -20,10 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class WalletsViewModelImpl extends WalletsViewModel {
@@ -37,14 +33,22 @@ public class WalletsViewModelImpl extends WalletsViewModel {
         Timber.d("ViewModel constructor");
 
         database = ((App) getApplication()).getDatabase();
+        database.open();
+    }
+
+    @Override
+    protected void onCleared() {
+        disposables.dispose();
+        database.close();
+        super.onCleared();
     }
 
 
     private SingleLiveData<Object> selectCurrency = new SingleLiveData<>();
     private MutableLiveData<Boolean> walletsVisible = new MutableLiveData<>();
     private MutableLiveData<Boolean> newWalletVisible = new MutableLiveData<>();
-    private MutableLiveData<List<WalletModel>> wallets = new MutableLiveData<>();
-    private MutableLiveData<List<TransactionModel>> transactions = new MutableLiveData<>();
+    private MutableLiveData<List<Wallet>> wallets = new MutableLiveData<>();
+    private MutableLiveData<List<Transaction>> transactions = new MutableLiveData<>();
 
 
     @Override
@@ -63,19 +67,18 @@ public class WalletsViewModelImpl extends WalletsViewModel {
     }
 
     @Override
-    public LiveData<List<WalletModel>> wallets() {
+    public LiveData<List<Wallet>> wallets() {
         return wallets;
     }
 
     @Override
-    public LiveData<List<TransactionModel>> transactions() {
+    public LiveData<List<Transaction>> transactions() {
         return transactions;
     }
 
     @Override
     void getWallets() {
         Disposable disposable = database.getWallets()
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         walletsModels -> {
 
@@ -88,8 +91,8 @@ public class WalletsViewModelImpl extends WalletsViewModel {
                                 walletsVisible.setValue(true);
 
                                 if (wallets.getValue() == null || wallets.getValue().isEmpty()) {
-                                    WalletModel model = walletsModels.get(0);
-                                    String walletId = model.wallet.walletId;
+                                    Wallet model = walletsModels.get(0);
+                                    String walletId = model.walletId;
                                     getTransaction(walletId);
                                 }
 
@@ -107,7 +110,6 @@ public class WalletsViewModelImpl extends WalletsViewModel {
 
     private void getTransaction(String walletId) {
         Disposable disposable = database.getTransactions(walletId)
-                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         transactions -> this.transactions.setValue(transactions)
                 );
@@ -123,7 +125,7 @@ public class WalletsViewModelImpl extends WalletsViewModel {
 
     @Override
     void onWalletChanged(int position) {
-        Wallet wallet = wallets.getValue().get(position).wallet;
+        Wallet wallet = wallets.getValue().get(position);
         getTransaction(wallet.walletId);
     }
 
@@ -137,7 +139,6 @@ public class WalletsViewModelImpl extends WalletsViewModel {
             database.saveTransaction(transactions);
             return new Object();
         })
-                .subscribeOn(Schedulers.io())
                 .subscribe(o -> {
 
                 }, Timber::e);
@@ -148,7 +149,7 @@ public class WalletsViewModelImpl extends WalletsViewModel {
 
     private Wallet randomWallet(CoinEntity coin) {
         Random random = new Random();
-        return new Wallet(UUID.randomUUID().toString(), coin.id, 10 * random.nextDouble());
+        return new Wallet(UUID.randomUUID().toString(), 10 * random.nextDouble(), coin);
     }
 
     private List<Transaction> randomTransactions(Wallet wallet) {
@@ -173,13 +174,8 @@ public class WalletsViewModelImpl extends WalletsViewModel {
         boolean amountSign = random.nextBoolean();
 
 
-        return new Transaction(wallet.walletId, wallet.currencyId, amountSign ? amount : -amount, date);
+        return new Transaction(wallet.walletId, amountSign ? amount : -amount, date, wallet.coin);
     }
 
 
-    @Override
-    protected void onCleared() {
-        disposables.dispose();
-        super.onCleared();
-    }
 }
