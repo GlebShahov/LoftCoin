@@ -29,7 +29,7 @@
                 android:gravity="center"
                 android:maxLines="1"
                 android:textColor="#000000"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 tools:ignore="MissingPrefix"
                 tools:text="A" />
 
@@ -42,7 +42,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_toEndOf="@id/symbol_text"
                 android:textSize="14sp"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 tools:text="BTC" />
 
 
@@ -68,7 +68,7 @@
                 android:layout_marginBottom="6dp"
                 android:textColor="@color/white"
                 android:textSize="16sp"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 tools:text="2.77744 BTC" />
 
 

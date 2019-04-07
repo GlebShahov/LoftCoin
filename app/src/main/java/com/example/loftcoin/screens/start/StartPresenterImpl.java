@@ -26,14 +26,16 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class StartPresenterImpl implements StartPresenter {
+
     private Prefs prefs;
     private Api api;
     private Database database;
     private CoinEntityMapper coinEntityMapper;
-    private CompositeDisposable disposables = new CompositeDisposable();
 
     @Nullable
     private StartView view;
+
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     public StartPresenterImpl(Prefs prefs, Api api, Database database, CoinEntityMapper coinEntityMapper) {
         this.prefs = prefs;
@@ -45,30 +47,46 @@ public class StartPresenterImpl implements StartPresenter {
     @Override
     public void attachView(StartView view) {
         this.view = view;
-
     }
 
     @Override
     public void detachView() {
         disposables.dispose();
-        view = null;
-
+        this.view = null;
     }
 
     @Override
     public void loadRates() {
-       Disposable disposable = api.rates(Api.CONVERT)
-               .subscribeOn(Schedulers.io())
-               .map(rateResponse -> rateResponse.data)
-               .map(coins -> coinEntityMapper.map(coins))
-               .doOnNext(coinEntities -> database.saveCoins(coinEntities))
-               .observeOn(AndroidSchedulers.mainThread())
-               .subscribe(coinEntities -> {
-                   if(view != null){
-                       view.navigateToMainScreen();
-                   }
-               }, throwable -> Timber.e(throwable));
-       disposables.add(disposable);
+
+
+        Disposable disposable = api.rates(Api.CONVERT)
+                .subscribeOn(Schedulers.io())
+                .map(rateResponse -> {
+                    List<Coin> coins = rateResponse.data;
+                    List<CoinEntity> coinEntities = coinEntityMapper.map(coins);
+                    return coinEntities;
+                })
+                .doOnNext(coinEntities -> {
+                    database.open();
+                    database.saveCoins(coinEntities);
+                    database.close();
+
+                })
+
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        coinEntities -> {
+                            if (view != null) {
+                                view.navigateToMainScreen();
+                            }
+                        },
+                        throwable -> {
+                            Timber.e(throwable);
+                        }
+                );
+
+
+        disposables.add(disposable);
 
     }
 }
