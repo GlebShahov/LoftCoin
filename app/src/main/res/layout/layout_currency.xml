@@ -14,7 +14,7 @@
         android:gravity="center"
         android:maxLines="1"
         android:textColor="#000000"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
         tools:ignore="MissingPrefix"
         tools:text="A" />
 
@@ -27,7 +27,7 @@
         android:gravity="start"
         android:textColor="@color/white"
         android:textSize="16sp"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
         tools:text="BTC" />
 
 </LinearLayout>
